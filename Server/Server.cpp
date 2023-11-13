@@ -9,9 +9,9 @@ int main(int argc, char** argv)
 	}
 	catch (Poco::Exception& exc)
 	{
-		server->logger().log(exc);
+          server->logger().log(exc);
           server->usage();
-		return Poco::Util::Application::EXIT_CONFIG;
+          return Poco::Util::Application::EXIT_CONFIG;
 	}
 	return server->run();
 }

@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include <Poco/Util/Application.h>
+#include <Poco/Util/ServerApplication.h>
 #include <Poco/Util/Option.h>
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
@@ -24,9 +25,9 @@ using Poco::AutoPtr;
 class Server: public Application
 {
 public:
-	Server(): _helpRequested( false ), multiconnect_( false )
-	{
-	}
+     Server(): _helpRequested( false ), multiconnect_( false )
+     {
+     }
      void usage()
      {
           handleHelp( "", "" );
@@ -81,7 +82,7 @@ protected:
 				.callback( OptionCallback<Server>( this, &Server::handleDb ) ) );
 
 		options.addOption(
-			Option("multiconnect", "m", "enable async mode")
+			Option( "multiconnect", "m", "enable async mode" )
 				.required(false)
 				.repeatable(false)
 				.callback(OptionCallback<Server>(this, &Server::handleAsync)));
