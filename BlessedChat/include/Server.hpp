@@ -12,6 +12,8 @@
 #include <sstream>
 #include <set>
 
+// using PocoApp = Poco::Util::Application;
+// using PocoOption = Poco::Util::Option;
 
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -80,7 +82,6 @@ protected:
 				.repeatable( false )
 				.argument( "value" )
 				.callback( OptionCallback<Server>( this, &Server::handleDb ) ) );
-
 		options.addOption(
 			Option( "multiconnect", "m", "enable async mode" )
 				.required(false)
