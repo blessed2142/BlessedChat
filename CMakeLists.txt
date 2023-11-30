@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.1)
 
 project(BlessedChatServer VERSION 1.0 LANGUAGES CXX)
 
-set(SIES_TARGET_OS "Linux" CACHE STRING "Target Operating System")
+set(TARGET_OS "Linux" CACHE STRING "Target Operating System")
 
-set(RESULT_DIR ${CMAKE_ROOT_DIR}/_result)
+set(RESULT_DIR ${CMAKE_SOURCE_DIR}/_result)
 set(BUILD_DIR ${CMAKE_BINARY_DIR})
-set(APP_DIR ${CMAKE_ROOT_DIR}/BlessedChat)
-set(COMPONENTS_DIR ${CMAKE_ROOT_DIR}/components)
+set(APP_DIR ${CMAKE_SOURCE_DIR}/BlessedChat)
+set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/components)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
      add_compile_definitions(_DEBUG)
@@ -42,7 +42,9 @@ endif()
 
 # add_subdirectory(cmake/cmn cmn)
 # 
-add_subdirectory(BlessedChat BlessedChatServer)
+# add_subdirectory(BlessedChat BlessedChatServer)
+add_subdirectory(${COMPONENTS_DIR}/arg_parser)
+add_subdirectory(BlessedChat)
 
 #developer test projects
 if(DEFINED BUILD_DEVOLOPERTOOLS)

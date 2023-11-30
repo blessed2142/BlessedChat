@@ -13,6 +13,7 @@ struct OptionName
 struct Option
 {
      OptionName               optionName;
+     std::string              description;
      bool                     required;
      bool                     repeatable;
      std::vector<std::string> value;
