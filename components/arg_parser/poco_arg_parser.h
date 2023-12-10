@@ -16,7 +16,6 @@ public:
      // OVERRIDE
      virtual const std::set<Option>& getOptions();
      virtual bool addOption( const Option& option );
-     virtual void removeOption( const Option& option );
      virtual void parse();
 
      Poco::Util::OptionSet getPocoOptionSet();
