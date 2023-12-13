@@ -104,7 +104,7 @@ protected:
 	{
 		if ( !_helpRequested )
 		{
-			// logger().information( "users:" );
+			logger().information( "users:" );
                std::cout << "users: " << std::endl;
                size_t i = 0;
                for ( auto& user : userNames_ )
@@ -128,8 +128,44 @@ protected:
                {
                     logger().information( "Server is in sync mode " );
                }
+               printProperties( "" );
+
+               // auto it = options_.begin();
+               // while ( it != options_.end() )
+               // {
+               //      std::cout << it->fullName() << " " << it-> << std::endl;
+               //      it++;
+               // }
+
 		}
 		return Application::EXIT_OK;
+	}
+
+	void printProperties(const std::string& base)
+	{
+		AbstractConfiguration::Keys keys;
+		config().keys(base, keys);
+		if (keys.empty())
+		{
+			if (config().hasProperty(base))
+			{
+				std::string msg;
+				msg.append(base);
+				msg.append(" = ");
+				msg.append(config().getString(base));
+				logger().information(msg);
+			}
+		}
+		else
+		{
+			for (AbstractConfiguration::Keys::const_iterator it = keys.begin(); it != keys.end(); ++it)
+			{
+				std::string fullKey = base;
+				if (!fullKey.empty()) fullKey += '.';
+				fullKey.append(*it);
+				printProperties(fullKey);
+			}
+		}
 	}
 
 private:

@@ -17,7 +17,8 @@ bool PocoArgParser::addOption( const Option& option )
                               option.description )
                               .required( option.required )
                               .repeatable( option.repeatable )
-                              .argument( option.valueType ) );
+                              .argument( option.valueType )
+                              .binding( option.name ) );
 }
 
 void PocoArgParser::parse()

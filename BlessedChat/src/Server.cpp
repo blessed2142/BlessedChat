@@ -6,9 +6,9 @@ void addOptions( PocoArgParser& argParser )
      std::vector<Option> options_vec =
      {
           { "user", "u", "username", true, false, "value" },
-          { "config", "c", "config file", true, false, "file" },
-          { "dbfile", "d", "db file", true, false, "file" },
-          { "multiconnect", "m", "multiconnect", false, false, "" }
+          // { "config", "c", "config file", true, false, "file" },
+          // { "dbfile", "d", "db file", true, false, "file" },
+          // { "multiconnect", "m", "multiconnect", false, false, "" }
      };
 
      for ( const auto& option : options_vec )
