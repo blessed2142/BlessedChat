@@ -4,6 +4,7 @@ project(BlessedChatServer VERSION 1.0 LANGUAGES CXX)
 
 set(SRC src/Server.cpp)
 
+include_directories( ./include ${COMPONENTS_DIR} )
 link_directories(${BUILD_DIR}/components/arg_parser)
 add_executable(BlessedChatServer ${SRC})
 

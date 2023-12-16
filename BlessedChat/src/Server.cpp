@@ -1,5 +1,5 @@
-#include "../include/Server.hpp"
-#include "../../components/arg_parser/poco_arg_parser.h"
+#include <Server.hpp>
+#include <arg_parser/poco_arg_parser.h>
 
 void addOptions( PocoArgParser& argParser )
 {
