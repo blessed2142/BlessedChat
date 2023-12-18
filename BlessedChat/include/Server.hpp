@@ -4,6 +4,7 @@
 #include <Poco/Util/Application.h>
 #include <Poco/Util/ServerApplication.h>
 #include <Poco/Util/Option.h>
+#include <Poco/Util/OptionException.h>
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
 #include <Poco/Util/AbstractConfiguration.h>
@@ -11,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <set>
+#include <filesystem>
 
 // using PocoApp = Poco::Util::Application;
 // using PocoOption = Poco::Util::Option;
@@ -102,6 +104,7 @@ protected:
 
 	int main( const ArgVec& args )
 	{
+          parseConfigFile();
 		if ( !_helpRequested )
 		{
 			logger().information( "users:" );
@@ -129,7 +132,6 @@ protected:
                     logger().information( "Server is in sync mode " );
                }
                printProperties( "" );
-
                // auto it = options_.begin();
                // while ( it != options_.end() )
                // {
@@ -167,6 +169,45 @@ protected:
 			}
 		}
 	}
+
+     std::string getConfigValue( const std::string& key )
+     {
+          if ( config().hasProperty( key ) )
+          {
+               return config().getString( key );
+          }
+          return std::string();
+     }
+
+     void parseConfigFile()
+     {
+          /*   1. Найти файл. Проверить валидность.
+               2. Считать опции.                  */
+          const std::string cfgOptionName = "config";
+          std::string cfgFilePath;
+          if ( config().hasOption( cfgOptionName ) )
+          {
+               cfgFilePath = config().getString( cfgOptionName );
+          }
+          else
+          {
+#ifdef MAIN_DIR
+               cfgFilePath = MAIN_DIR;
+               cfgFilePath.erase( cfgFilePath.begin() );
+               cfgFilePath.erase( --cfgFilePath.end() );
+               cfgFilePath += "/settings.ini";
+#else
+               throw Poco::Util::MissingOptionException( "Config file path was not defined" );
+#endif
+          }
+          if ( !std::filesystem::exists( cfgFilePath ) ||
+               !std::filesystem::is_regular_file( cfgFilePath ) )
+          {
+               throw Poco::Util::MissingOptionException( "Couldnt load config file" );
+          }
+
+          loadConfiguration( cfgFilePath );
+     }
 
 private:
 	bool                     _helpRequested;
