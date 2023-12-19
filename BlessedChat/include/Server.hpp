@@ -12,9 +12,13 @@
 #include <sstream>
 #include <set>
 
+// using PocoApp = Poco::Util::Application;
+// using PocoOption = Poco::Util::Option;
+
+namespace PU = Poco::Util;
 
 using Poco::Util::Application;
-using Poco::Util::Option;
+// using Poco::Util::Option;
 using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 using Poco::Util::AbstractConfiguration;
@@ -25,7 +29,7 @@ using Poco::AutoPtr;
 class Server: public Application
 {
 public:
-     Server(): _helpRequested( false ), multiconnect_( false )
+     Server( const OptionSet& options ): _helpRequested( false ), multiconnect_( false ), options_( options )
      {
      }
      void usage()
@@ -52,40 +56,13 @@ protected:
 
 	void defineOptions( OptionSet& options )
 	{
-		Application::defineOptions( options );
-
+		Application::defineOptions( options_ );
+          options = options_;
 		options.addOption(
-			Option( "help", "h", "display help information on command line arguments" )
+			PU::Option( "help", "h", "display help information on command line arguments" )
 				.required( false )
 				.repeatable( false )
 				.callback( OptionCallback<Server>( this, &Server::handleHelp ) ) );
-
-		options.addOption(
-			Option( "user", "u", "define user" )
-				.required( true )
-				.repeatable( true )
-				.argument( "value" )
-				.callback( OptionCallback<Server>( this, &Server::handleUser ) ) );
-
-		options.addOption(
-			Option( "config", "c", "load configuration data from a file" )
-				.required( true )
-				.repeatable( false )
-				.argument( "value" )
-				.callback( OptionCallback<Server>( this, &Server::handleConfig ) ) );
-
-		options.addOption(
-			Option( "db-file", "d", "load user passwords from a file" )
-				.required( false )
-				.repeatable( false )
-				.argument( "value" )
-				.callback( OptionCallback<Server>( this, &Server::handleDb ) ) );
-
-		options.addOption(
-			Option( "multiconnect", "m", "enable async mode" )
-				.required(false)
-				.repeatable(false)
-				.callback(OptionCallback<Server>(this, &Server::handleAsync)));
 	}
 
 	void handleHelp( const std::string& name, const std::string& value )
@@ -128,10 +105,11 @@ protected:
 		if ( !_helpRequested )
 		{
 			logger().information( "users:" );
+               std::cout << "users: " << std::endl;
                size_t i = 0;
                for ( auto& user : userNames_ )
                {
-                    std::cout << ++i << ") " << user << std::endl;
+                    std::cout << "user" << ++i << ") " << user << std::endl;
                }
                std::cout << std::endl;
 
@@ -150,8 +128,44 @@ protected:
                {
                     logger().information( "Server is in sync mode " );
                }
+               printProperties( "" );
+
+               // auto it = options_.begin();
+               // while ( it != options_.end() )
+               // {
+               //      std::cout << it->fullName() << " " << it-> << std::endl;
+               //      it++;
+               // }
+
 		}
 		return Application::EXIT_OK;
+	}
+
+	void printProperties(const std::string& base)
+	{
+		AbstractConfiguration::Keys keys;
+		config().keys(base, keys);
+		if (keys.empty())
+		{
+			if (config().hasProperty(base))
+			{
+				std::string msg;
+				msg.append(base);
+				msg.append(" = ");
+				msg.append(config().getString(base));
+				logger().information(msg);
+			}
+		}
+		else
+		{
+			for (AbstractConfiguration::Keys::const_iterator it = keys.begin(); it != keys.end(); ++it)
+			{
+				std::string fullKey = base;
+				if (!fullKey.empty()) fullKey += '.';
+				fullKey.append(*it);
+				printProperties(fullKey);
+			}
+		}
 	}
 
 private:
@@ -160,6 +174,7 @@ private:
      std::set<std::string>    userNames_;
      std::string              configPath_;
      std::string              dbPath_;
+     OptionSet                options_;
 };
 
 #endif
