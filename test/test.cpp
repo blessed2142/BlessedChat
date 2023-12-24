@@ -52,15 +52,16 @@ namespace
 			try
 			{
 				char buffer[256];
+				std::string msg;
 				int n = ss.receiveBytes(buffer, sizeof(buffer));
-				while (n > 0)
+				while ( n > 0 )
 				{
 					std::cout << "Received " << n << " bytes:" << std::endl;
-					std::string msg;
-					Logger::formatDump(msg, buffer, n);
-					std::cout << msg << std::endl;
+					msg += buffer;
 					n = ss.receiveBytes(buffer, sizeof(buffer));
 				}
+				std::cout << msg << std::endl;
+                    ss.sendBytes( msg.data(), static_cast<int>( msg.length() ) );
 			}
 			catch (Exception& exc)
 			{
