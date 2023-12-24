@@ -46,6 +46,8 @@ endif()
 add_subdirectory(${COMPONENTS_DIR}/arg_parser)
 add_subdirectory(BlessedChat)
 
+add_subdirectory(test)
+
 #developer test projects
 if(DEFINED BUILD_DEVOLOPERTOOLS)
     # add_subdirectory(cmake/sies_sm_ws_test sies_sm_ws_test)
