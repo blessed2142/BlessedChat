@@ -2,8 +2,8 @@
 #define SERVER_HPP
 
 #include <Poco/Util/Application.h>
-#include <Poco/Util/ServerApplication.h>
 #include <Poco/Util/Option.h>
+#include <Poco/Util/OptionException.h>
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
 #include <Poco/Util/AbstractConfiguration.h>
@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include <set>
+#include <filesystem>
 
 // using PocoApp = Poco::Util::Application;
 // using PocoOption = Poco::Util::Option;
@@ -29,144 +30,25 @@ using Poco::AutoPtr;
 class Server: public Application
 {
 public:
-     Server( const OptionSet& options ): _helpRequested( false ), multiconnect_( false ), options_( options )
-     {
-     }
-     void usage()
-     {
-          handleHelp( "", "" );
-     }
+
+Server( const OptionSet& options );
+void usage();
 
 protected:
-	void initialize( Application& self )
-	{
-		// loadConfiguration(); // load default configuration files, if present
-		Application::initialize( self );
-	}
-
-	void uninitialize()
-	{
-		Application::uninitialize();
-	}
-
-	void reinitialize( Application& self )
-	{
-		Application::reinitialize( self );
-	}
-
-	void defineOptions( OptionSet& options )
-	{
-		Application::defineOptions( options_ );
-          options = options_;
-		options.addOption(
-			PU::Option( "help", "h", "display help information on command line arguments" )
-				.required( false )
-				.repeatable( false )
-				.callback( OptionCallback<Server>( this, &Server::handleHelp ) ) );
-	}
-
-	void handleHelp( const std::string& name, const std::string& value )
-	{
-		_helpRequested = true;
-		displayHelp();
-		stopOptionsProcessing();
-	}
-
-	void handleAsync( const std::string& name, const std::string& value )
-	{
-          multiconnect_ = true;
-	}
-
-	void handleConfig( const std::string& name, const std::string& value )
-	{
-          configPath_ = value;
-	}
-
-	void handleDb( const std::string& name, const std::string& value )
-	{
-          dbPath_ = value;
-	}
-
-     void handleUser( const std::string& name, const std::string& value )
-     {
-          userNames_.insert( value );
-     }
-
-	void displayHelp()
-	{
-		HelpFormatter helpFormatter( options() );
-		helpFormatter.setCommand( commandName() );
-		helpFormatter.setUsage( "OPTIONS" );
-		helpFormatter.format( std::cout );
-	}
-
-	int main( const ArgVec& args )
-	{
-		if ( !_helpRequested )
-		{
-			logger().information( "users:" );
-               std::cout << "users: " << std::endl;
-               size_t i = 0;
-               for ( auto& user : userNames_ )
-               {
-                    std::cout << "user" << ++i << ") " << user << std::endl;
-               }
-               std::cout << std::endl;
-
-               logger().information( "config_path: " + configPath_ );
-
-               if ( !dbPath_.empty() )
-               {
-                    logger().information( "db_path: " + dbPath_ );
-               }
-
-               if ( multiconnect_ == true )
-               {
-                    logger().information( "Server is in async mode " );
-               }
-               else 
-               {
-                    logger().information( "Server is in sync mode " );
-               }
-               printProperties( "" );
-
-               // auto it = options_.begin();
-               // while ( it != options_.end() )
-               // {
-               //      std::cout << it->fullName() << " " << it-> << std::endl;
-               //      it++;
-               // }
-
-		}
-		return Application::EXIT_OK;
-	}
-
-	void printProperties(const std::string& base)
-	{
-		AbstractConfiguration::Keys keys;
-		config().keys(base, keys);
-		if (keys.empty())
-		{
-			if (config().hasProperty(base))
-			{
-				std::string msg;
-				msg.append(base);
-				msg.append(" = ");
-				msg.append(config().getString(base));
-				logger().information(msg);
-			}
-		}
-		else
-		{
-			for (AbstractConfiguration::Keys::const_iterator it = keys.begin(); it != keys.end(); ++it)
-			{
-				std::string fullKey = base;
-				if (!fullKey.empty()) fullKey += '.';
-				fullKey.append(*it);
-				printProperties(fullKey);
-			}
-		}
-	}
+virtual void initialize( Application& self ) override;
+virtual void uninitialize() override;
+virtual void reinitialize( Application& self ) override;
+virtual void defineOptions( OptionSet& options ) override;
+void handleHelp( const std::string& name, const std::string& value );
+void handleAsync( const std::string& name, const std::string& value );
+void handleConfig( const std::string& name, const std::string& value );
+void handleDb( const std::string& name, const std::string& value );
+void handleUser( const std::string& name, const std::string& value );
+void displayHelp();
+virtual int main( const ArgVec& args ) override;
+void printProperties(const std::string& base);
+std::string getConfigValue( const std::string& key );
+void parseConfigFile();
 
 private:
 	bool                     _helpRequested;
