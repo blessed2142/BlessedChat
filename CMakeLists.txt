@@ -44,6 +44,7 @@ endif()
 # 
 # add_subdirectory(BlessedChat BlessedChatServer)
 add_subdirectory(${COMPONENTS_DIR}/arg_parser)
+add_subdirectory(${COMPONENTS_DIR}/utils)
 add_subdirectory(BlessedChat)
 
 add_subdirectory(test)
