@@ -19,9 +19,7 @@
 #include "Poco/Process.h"
 #include "Poco/NamedEvent.h"
 #include <iostream>
-
-#include <components/utils/base64.h>
-#include <components/utils/utils.h>
+#include <components/message_decoder/message_decoder.h>
 
 
 using Poco::Net::TCPServer;
@@ -40,6 +38,8 @@ using Poco::ProcessImpl;
 using Poco::Exception;
 
 
+typedef std::vector<unsigned char> ByteVector;
+
 namespace
 {
      class ClientConnection: public TCPServerConnection
@@ -52,34 +52,29 @@ namespace
           void run()
           {
                StreamSocket& ss = socket();
+               MessageDecoder mesDec;
                try
                {
-                    char lenBuffer[32];
-                    int n = ss.receiveBytes(lenBuffer, sizeof(lenBuffer));
+                    // char lenBuffer[32];
+                    ByteVector lenBuf;
+                    lenBuf.resize( sizeof( uint32_t ) );
+                    bzero( lenBuf.data(), sizeof( uint32_t ) );
+                    // int n = ss.receiveBytes(lenBuffer, sizeof(lenBuffer));
+                    int n = ss.receiveBytes( lenBuf.data(), lenBuf.size() );
 
-                    std::stringstream sstream( lenBuffer );
-                    std::bitset<32> lenBits;
-                    sstream >> lenBits;
-                    const int encodedLen = static_cast<int>( lenBits.to_ulong() ) + 1;
-                    std::cout << "EncodedLen: " << encodedLen << std::endl;
+                    uint32_t dataLen = static_cast<uint32_t>( *lenBuf.data() );
+                    std::cout << "Received data length: " << dataLen << std::endl;
 
-                    char messageBuffer[encodedLen];
-                    bzero( messageBuffer, encodedLen );
-                    ss.sendBytes( lenBuffer, sizeof( lenBuffer) );
-                    n = ss.receiveBytes( messageBuffer, sizeof( messageBuffer ) );
+                    ByteVector dataBuf;
+                    dataBuf.resize( dataLen);
+                    bzero( dataBuf.data(), dataBuf.size() );
+                    n = ss.receiveBytes( dataBuf.data(), dataBuf.size() );
+                    std::string messageStr( dataBuf.begin(), dataBuf.end() );
+                    std::cout << "EncodedMessage: " << messageStr << std::endl;
 
-                    std::string messageStr( messageBuffer );
-                    std::cout << "EncodedMessage: " << messageBuffer << std::endl;
-                    // while ( n > 0 )
-                    // {
-                    // 	std::cout << "Received " << n << " bytes:" << std::endl;
-                    // 	msg += buffer;
-                    // 	n = ss.receiveBytes(buffer, sizeof(buffer));
-                    // }
-                    std::string decodedMesage = base64decode( messageStr );
-                    std::cout << "Message is: " << std::endl
-                              << decodedMesage;
-                    ss.sendBytes( decodedMesage.data(), static_cast<int>( decodedMesage.length() ) );
+                    std::cout << "Size: " << messageStr.length() << std::endl;
+                    std::string decodedMesage = mesDec.deserialize( messageStr );
+                    std::cout << "Message is: " << decodedMesage << std::endl;
                }
                catch (Exception& exc)
                {
@@ -115,26 +110,5 @@ int main(int argc, char** argv)
 		std::cerr << exc.displayText() << std::endl;
 		return 1;
 	}
-// eyJ3YXNzdXAgdGVzdCAxMjMifSDRgNGD0YHRgdC60LjQtSDQsdGD0LrQstGLINC4INGA0YPR
-// gdGB0LrQuNC1INGB0LvQvtCy0LA6Ojo=;�dU
-
-
-     // std::string str = "{badr hari:[][] qqq{}}";
-
-     // std::string original( "{\"wassup test 123\"} русские буквы и русские слова:::" );
-     // std::string encoded = base64encode( original );
-     // std::string decoded = base64decode( encoded );
-
-
-     // std::cout << "original: " << original << "\n"
-     //           << "encoded:  " << encoded << " size: " << encoded.size() << "\n"
-     //           << "encoded:  " << decoded << " size: " << decoded.size() << "\n";
-
-     // std::string str = "Пап привет как дела";
-     // std::string encoded = base64encode( str );
-     // std::string decoded = base64decode( encoded );
-     // std::cout << "original: " << str << "\n"
-     //           << "encoded:  " << encoded << "\n"
-     //           << "decoded:  " << decoded << "\n";
 	return 0;
 }

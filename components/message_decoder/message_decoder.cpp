@@ -1,6 +1,16 @@
-#include "base64.h"
+#include "message_decoder.h"
 
-std::string base64encode( const std::string& str )
+// STD
+#include <sstream>
+
+// POCO
+#include <Poco/Base64Encoder.h>
+#include <Poco/Base64Decoder.h>
+#include <Poco/StreamCopier.h>
+
+MessageDecoder::MessageDecoder() {}
+
+std::string MessageDecoder::serialize( const std::string& str )
 {
      std::stringstream strStream;
      strStream.str( "" );
@@ -12,7 +22,7 @@ std::string base64encode( const std::string& str )
      return strStream.str();
 }
 
-std::string base64decode( const std::string& str )
+std::string MessageDecoder::deserialize( const std::string& str )
 {
      std::stringstream strStream;
      strStream.str( str );
