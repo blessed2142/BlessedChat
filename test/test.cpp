@@ -20,6 +20,7 @@
 #include "Poco/NamedEvent.h"
 #include <iostream>
 #include <components/message_decoder/message_decoder.h>
+#include <mutex>
 
 
 using Poco::Net::TCPServer;
@@ -91,24 +92,35 @@ namespace
 #endif
 }
 
-int main(int argc, char** argv)
+
+int main()
 {
-	try
-	{
-		Poco::UInt16 port = NumberParser::parse((argc > 1) ? argv[1] : "2001");
+     // std::mutex logMutex;
 
-		TCPServer srv(new TCPFactory(), port);
-		srv.start();
+     // Blessed::Logger logger( logMutex, "", Blessed::Logger::LogLevel::DEBUG );
 
-		std::cout << "TCP server listening on port " << port << '.'
-			 << std::endl << "Press Ctrl-C to quit." << std::endl;
-
-		terminator.wait();
-	}
-	catch (Exception& exc)
-	{
-		std::cerr << exc.displayText() << std::endl;
-		return 1;
-	}
-	return 0;
+     // logger.info << "qq" << 1 << 'c' << "\n";
+     return ( 0 );
 }
+
+// int main(int argc, char** argv)
+// {
+// 	try
+// 	{
+// 		Poco::UInt16 port = NumberParser::parse((argc > 1) ? argv[1] : "2001");
+
+// 		TCPServer srv(new TCPFactory(), port);
+// 		srv.start();
+
+// 		std::cout << "TCP server listening on port " << port << '.'
+// 			 << std::endl << "Press Ctrl-C to quit." << std::endl;
+
+// 		terminator.wait();
+// 	}
+// 	catch (Exception& exc)
+// 	{
+// 		std::cerr << exc.displayText() << std::endl;
+// 		return 1;
+// 	}
+// 	return 0;
+// }
